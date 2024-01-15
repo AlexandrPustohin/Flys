@@ -35,7 +35,14 @@ public class Main {
                     .map(c -> c.getKey().getCarrier() + " "
                             + convertMillisToTime(c.getValue()))
                     .forEach(System.out::println);
-            difference = (averagePrice(ticketsList) - medianPrice(ticketsList));
+            List<Ticket> sortTicketsList = ticketsList.stream().sorted((t1, t2)-> {
+                try {
+                    return Ticket.comparePrice(t1, t2);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+            difference = (averagePrice(sortTicketsList) - medianPrice(sortTicketsList));
             System.out.println("The difference between average price and median is " + difference);
             writeToFile(outFile);
         } else{
