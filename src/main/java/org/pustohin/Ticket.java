@@ -1,4 +1,4 @@
-package orgpustohin;
+package org.pustohin;
 
 
 
@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter

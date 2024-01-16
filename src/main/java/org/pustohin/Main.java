@@ -1,10 +1,9 @@
-package orgpustohin;
+package org.pustohin;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
@@ -28,28 +27,42 @@ public class Main {
 
 
             List<Ticket> ticketsList = sortedTicketList(ticketsMapList, "VVO", "TLV");
-            minFlyDuration = getListMinFlyDuration(ticketsList);
-            //перевозчики с минимальной длительностью перелета
-            System.out.println("перевозчики с минимальной длительностью перелета:");
-            minFlyDuration.entrySet().stream()
-                    .map(c -> c.getKey().getCarrier() + " "
-                            + convertMillisToTime(c.getValue()))
-                    .forEach(System.out::println);
-            List<Ticket> sortTicketsList = ticketsList.stream().sorted((t1, t2)-> {
+
+            ticketsList.stream().forEach(t-> {
                 try {
-                    return Ticket.comparePrice(t1, t2);
+                    System.out.println(t.getCarrier()+" "+t.getDuration() + " "+convertMillisToTime(t.getDuration()));
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-            }).collect(Collectors.toList());
-            difference = (averagePrice(sortTicketsList) - medianPrice(sortTicketsList));
-            System.out.println("The difference between average price and median is " + difference);
+            });
+
+            minFlyDuration = getListMinFlyDuration(ticketsList);
+            //перевозчики с минимальной длительностью перелета
+            System.out.println("перевозчики с минимальной длительностью перелета:");
+            minFlyDuration.entrySet().stream().sorted(Map.Entry.comparingByValue())
+                    .map(c -> c.getKey().getCarrier() + " "
+                            + convertMillisToTime(c.getValue()))
+                    .forEach(System.out::println);
+
+            difference = (averagePrice(ticketsList) - medianPrice(sortedListByPrice(ticketsList)));
+            System.out.println("Разница между средней и медианной ценой " + difference);
             writeToFile(outFile);
         } else{
             throw new RuntimeException("Not enough parameters!");
         }
     }
 
+
+    private static List<Ticket> sortedListByPrice(List<Ticket> ticketsList){
+        List<Ticket> sortTicketsList = ticketsList.stream().sorted((t1, t2)-> {
+            try {
+                return Ticket.comparePrice(t1, t2);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
+        return sortTicketsList;
+    }
     private static double medianPrice(List<Ticket> ticketsList) {
         double medianPrice;
         if (ticketsList.size() % 2 == 0)
